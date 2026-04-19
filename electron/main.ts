@@ -34,22 +34,6 @@ function createMenu() {
           },
         },
         {
-          label: "Speaker Schedule",
-          click: () => {
-            if (mainWindow) {
-              mainWindow.webContents.send("nav:speaker-schedule");
-            }
-          },
-        },
-        {
-          label: "Unit Schedule",
-          click: () => {
-            if (mainWindow) {
-              mainWindow.webContents.send("nav:unit-schedule");
-            }
-          },
-        },
-        {
           label: "Refresh Data",
           accelerator: "CmdOrCtrl+R",
           click: () => {
@@ -84,6 +68,27 @@ function createMenu() {
           label: "Status: No data directory set",
           enabled: false,
           id: "menu-status",
+        },
+      ],
+    },
+    {
+      label: "Schedule",
+      submenu: [
+        {
+          label: "Speaker Schedule",
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send("nav:speaker-schedule");
+            }
+          },
+        },
+        {
+          label: "Unit Schedule",
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send("nav:unit-schedule");
+            }
+          },
         },
       ],
     },

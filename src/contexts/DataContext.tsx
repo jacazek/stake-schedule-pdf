@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { useNavigate } from "react-router-dom";
+
 interface DataState {
   speakerData: unknown[] | null;
   unitData: unknown[] | null;
@@ -33,6 +35,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [dataDir, setDataDir] = useState<string | null>(null);
   const [watching, setWatching] = useState(false);
   const watchRef = useRef<{ callbackId: string | null }>({ callbackId: null });
+  const navigate = useNavigate();
 
   const readFile = useCallback(async (filePath: string): Promise<string> => {
     const result = await window.electron.fs.readFile(filePath);
@@ -126,15 +129,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const subscription1 = window.electron.onEvent(
       "nav:speaker-schedule",
       () => {
-        window.history.pushState(null, "", "/speaker-schedule");
+        navigate("/speaker-schedule");
       },
     );
-    const subscription2 = window.electron.onEvent(
-      "nav:unit-schedule",
-      () => {
-        window.history.pushState(null, "", "/unit-schedule");
-      },
-    );
+    const subscription2 = window.electron.onEvent("nav:unit-schedule", () => {
+      navigate("/unit-schedule");
+    });
     return () => {
       subscription1.off();
       subscription2.off();
