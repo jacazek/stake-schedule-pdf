@@ -7,7 +7,9 @@
     "dev": "vite --port 8015 --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "NODE_ENV=development concurrently \"vite --port 8015\" \"wait-on http://localhost:8015 && npx tsc --project electron/tsconfig.json && electron .\"",
+    "electron:build": "vite build --config electron/vite.electron.ts && npx tsc --project electron/tsconfig.json && electron-builder --config electron-builder.json"
   },
   "dependencies": {
     "@ag-media/react-pdf-table": "^2.0.3",
@@ -24,9 +26,11 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.1.0",
     "electron": "^41.2.1",
     "electron-builder": "^26.8.1",
     "eslint": "^9.36.0",
+    "wait-on": "^8.0.2",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",

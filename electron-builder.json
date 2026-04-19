@@ -1,0 +1,15 @@
+{
+  "appId": "com.durhamstake.app",
+  "files": [
+    "dist/**/*",
+    "main.js",
+    "preload.js"
+  ],
+  "extraMetadata": {
+    "main": "main.js"
+  },
+  "linux": {
+    "target": ["AppImage"],
+    "category": "Office"
+  }
+}
