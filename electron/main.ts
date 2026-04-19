@@ -24,9 +24,6 @@ function createMenu() {
                 properties: ["openDirectory"],
               });
               if (!result.canceled && result.filePaths.length > 0) {
-                dialog.showMessageBox(mainWindow, {
-                  message: result.filePaths.join("; "),
-                });
                 updateMenuStatus(result.filePaths[0], true);
                 mainWindow.webContents.send(
                   "data:directory-selected",
@@ -53,6 +50,16 @@ function createMenu() {
           click: () => {
             if (mainWindow) {
               mainWindow.webContents.send("menu:toggle-autoreload");
+            }
+          },
+        },
+        { type: "separator" },
+        {
+          label: "Toggle Developer Tools",
+          accelerator: "F12",
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.toggleDevTools();
             }
           },
         },
@@ -187,6 +194,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       devTools: true,
+      sandbox: false,
     },
   });
 

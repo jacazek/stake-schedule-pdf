@@ -39,34 +39,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return result;
   }, []);
 
-  const loadData = useCallback(async () => {
-    if (!dataDir) return;
+  const loadData = useCallback(
+    async (dir?: string) => {
+      const currentDir = dir ?? dataDir;
+      if (!currentDir) {
+        return;
+      }
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      const speakerPath = pathJoin(dataDir, "speaker-schedule.json");
-      const unitPath = pathJoin(dataDir, "unit-schedule.json");
+      try {
+        const speakerPath = pathJoin(currentDir, "speaker-schedule.json");
+        const unitPath = pathJoin(currentDir, "unit-schedule.json");
 
-      const [speakerRaw, unitRaw] = await Promise.all([
-        readFile(speakerPath),
-        readFile(unitPath),
-      ]);
+        const [speakerRaw, unitRaw] = await Promise.all([
+          readFile(speakerPath),
+          readFile(unitPath),
+        ]);
 
-      const speaker = JSON.parse(speakerRaw);
-      const unit = JSON.parse(unitRaw);
+        const speaker = JSON.parse(speakerRaw);
+        const unit = JSON.parse(unitRaw);
 
-      setSpeakerData(speaker);
-      setUnitData(unit);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to load data files";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, [dataDir, readFile]);
+        setSpeakerData(speaker);
+        setUnitData(unit);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to load data files";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [dataDir, readFile],
+  );
 
   const selectDirectory = useCallback(
     async (dir: string) => {
@@ -93,7 +99,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setWatching(true);
 
       // Load data after setting up watch
-      await loadData();
+      await loadData(dir);
     },
     [loadData],
   );
@@ -107,8 +113,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!window.electron) return;
     const subscription = window.electron.onEvent(
       "data:directory-selected",
-      (_event: unknown, dir: string) => {
-        window.alert(dir);
+      (dir: string) => {
         selectDirectory(dir);
       },
     );
@@ -154,5 +159,5 @@ export function useData() {
 // Simple path join that works in browser context
 function pathJoin(base: string, ...parts: string[]): string {
   const joined = base.split(/[/\\]/).filter(Boolean).join("/");
-  return `${joined}/${parts.join("/")}`;
+  return `/${joined}/${parts.join("/")}`;
 }
