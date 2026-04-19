@@ -7,9 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow: BrowserWindow | null = null;
-let watchWatcher: fs.FSWatcher | null = null;
-let watchCallbackId = 0;
-const changeCallbacks = new Map<string, string>(); // callbackId -> renderer window reference
+const watchFiles = new Map<string, ReturnType<typeof fs.watchFile>>();
 
 function createMenu() {
   const template: any = [
@@ -131,53 +129,39 @@ function setupIPC() {
     return fs.promises.readFile(filePath, "utf-8");
   });
 
-  // FSWatch: start watching
+  // FSWatch: start watching (polling-based, reliable on Linux)
   ipcMain.handle(
     "fswatch:watch",
-    async (event, dir: string, callbackId: string) => {
-      // Stop any existing watch
-      if (watchWatcher) {
-        watchWatcher.close();
-        watchWatcher = null;
+    async (_event, dir: string, callbackId: string) => {
+      // Stop existing watches
+      for (const [, watcher] of watchFiles) {
+        (watcher as any).close();
       }
+      watchFiles.clear();
 
-      watchCallbackId++;
-      const currentId = watchCallbackId;
+      const dataFiles = ["speaker-schedule.json", "unit-schedule.json"];
+      const filePaths = dataFiles.map((f) => path.join(dir, f));
 
-      // Register callback info for this IPC call
-      changeCallbacks.set(
-        callbackId,
-        (event.sender as any).getURL?.() ?? "renderer",
-      );
-
-      watchWatcher = fs.watch(dir, (eventType, filename) => {
-        if (!filename) return;
-        // Notify all registered callbacks
-        for (const [cbId, _url] of changeCallbacks) {
+      for (const filePath of filePaths) {
+        const watcher = fs.watchFile(filePath, { interval: 1000 }, () => {
           const win = mainWindow;
           if (win && !win.isDestroyed()) {
-            win.webContents.send(
-              "fswatch:change",
-              cbId,
-              eventType,
-              filename.toString(),
-            );
+            win.webContents.send("fswatch:change", callbackId, "change", path.basename(filePath));
           }
-        }
-      });
+        });
+        watchFiles.set(filePath, watcher);
+      }
 
       updateMenuStatus(dir, true);
-      return currentId;
     },
   );
 
   // FSWatch: stop watching
   ipcMain.handle("fswatch:unwatch", async () => {
-    if (watchWatcher) {
-      watchWatcher.close();
-      watchWatcher = null;
+    for (const [, watcher] of watchFiles) {
+      (watcher as any).close();
     }
-    changeCallbacks.clear();
+    watchFiles.clear();
     updateMenuStatus(null, false);
   });
 

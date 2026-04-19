@@ -34,7 +34,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [dataDir, setDataDir] = useState<string | null>(null);
   const [watching, setWatching] = useState(false);
-  const watchRef = useRef<{ callbackId: string | null }>({ callbackId: null });
+  const watchRef = useRef<{
+    callbackId: string | null;
+    fileChangeOff: { off: () => void } | null;
+    lastLoad: number;
+  }>({ callbackId: null, fileChangeOff: null, lastLoad: 0 });
   const navigate = useNavigate();
 
   const readFile = useCallback(async (filePath: string): Promise<string> => {
@@ -66,6 +70,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
         setSpeakerData(speaker);
         setUnitData(unit);
+
+        watchRef.current.lastLoad = Date.now();
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Failed to load data files";
@@ -82,10 +88,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setDataDir(dir);
       setError(null);
 
-      // Stop existing watch
+      // Stop existing watch and cleanup IPC listener
       if (watchRef.current.callbackId !== null) {
         await window.electron.fswatch.unwatch();
         setWatching(false);
+        if (watchRef.current.fileChangeOff) {
+          watchRef.current.fileChangeOff.off();
+          watchRef.current.fileChangeOff = null;
+        }
+        // Remove old callback so new IPC listener doesn't find stale IDs
+        window.electron.removeChangeCallback(watchRef.current.callbackId);
       }
 
       // Start watching
@@ -94,9 +106,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       window.electron.onChange(id, (_event, filename) => {
         if (filename && DATA_FILES.some((f) => filename.includes(f))) {
-          loadData();
+          // Debounce: skip reloads within 2s of last load to avoid parsing
+          // incomplete JSON while the editor is still writing the file
+          const now = Date.now();
+          if (now - watchRef.current.lastLoad < 2000) {
+            return;
+          }
+          loadData(dir);
         }
       });
+
+      watchRef.current.fileChangeOff = window.electron.onFileChange();
 
       await window.electron.fswatch.watch(dir, id);
       setWatching(true);
@@ -147,6 +167,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (watchRef.current.callbackId !== null) {
         window.electron.fswatch.unwatch();
         window.electron.removeChangeCallback(watchRef.current.callbackId);
+        if (watchRef.current.fileChangeOff) {
+          watchRef.current.fileChangeOff.off();
+        }
       }
     };
   }, []);

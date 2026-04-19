@@ -23,6 +23,20 @@ const electronAPI = {
     (window as any).__dataChangeCallbacks ??= {}
     ;(window as any).__dataChangeCallbacks[callbackId] = callback
   },
+  onFileChange: (): { off: () => void } => {
+    const handler = (_event: unknown, callbackId: string, _eventType: string, filename: string) => {
+      const callbacks = (window as any).__dataChangeCallbacks
+      if (callbacks && callbacks[callbackId]) {
+        callbacks[callbackId](_eventType, filename)
+      }
+    }
+    ipcRenderer.on('fswatch:change', handler)
+    return {
+      off: () => {
+        ipcRenderer.removeListener('fswatch:change', handler)
+      },
+    }
+  },
   removeChangeCallback: (callbackId: string): void => {
     const callbacks = (window as any).__dataChangeCallbacks
     if (callbacks) delete callbacks[callbackId]
