@@ -85,11 +85,21 @@ npm run build
 
 ### Desktop (Electron distributable)
 
+#### Linux
+
 ```bash
 npm run electron:build
 ```
 
-This produces an AppImage in the `dist/` directory (e.g., `dist/pdf-test-0.0.0.AppImage`). The AppImage can be run directly on most Linux distributions.
+This produces an AppImage in the `dist/` directory (e.g., `dist/stake-schedule-pdf-0.0.0.AppImage`). The AppImage can be run directly on most Linux distributions.
+
+#### Windows
+
+```bash
+npm run electron:build:win
+```
+
+This produces a portable zip archive in the `dist/` directory (e.g., `dist/stake-schedule-pdf-0.0.0-win.zip`). Extract the zip and run `stake-schedule-pdf.exe` on any Windows machine — no installation required.
 
 ## Clean
 
