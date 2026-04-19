@@ -3,7 +3,8 @@
   "files": [
     "electron/dist/**/*",
     "dist-electron/main.js",
-    "dist-electron/preload.js"
+    "dist-electron/preload.js",
+    "dist/**/*"
   ],
   "extraMetadata": {
     "main": "dist-electron/main.js"
