@@ -34,6 +34,22 @@ function createMenu() {
           },
         },
         {
+          label: "Speaker Schedule",
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send("nav:speaker-schedule");
+            }
+          },
+        },
+        {
+          label: "Unit Schedule",
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send("nav:unit-schedule");
+            }
+          },
+        },
+        {
           label: "Refresh Data",
           accelerator: "CmdOrCtrl+R",
           click: () => {
