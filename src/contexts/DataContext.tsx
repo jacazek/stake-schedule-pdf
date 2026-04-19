@@ -120,6 +120,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => subscription.off();
   }, [selectDirectory]);
 
+  // Listen for navigation from Electron menu
+  useEffect(() => {
+    if (!window.electron) return;
+    const subscription1 = window.electron.onEvent(
+      "nav:speaker-schedule",
+      () => {
+        window.history.pushState(null, "", "/speaker-schedule");
+      },
+    );
+    const subscription2 = window.electron.onEvent(
+      "nav:unit-schedule",
+      () => {
+        window.history.pushState(null, "", "/unit-schedule");
+      },
+    );
+    return () => {
+      subscription1.off();
+      subscription2.off();
+    };
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
