@@ -8,8 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "electron:dev": "NODE_ENV=development concurrently \"vite --port 8015\" \"wait-on http://localhost:8015 && npx tsc --project electron/tsconfig.json && electron .\"",
-    "electron:build": "vite build --config electron/vite.electron.ts && npx tsc --project electron/tsconfig.json && electron-builder --config electron-builder.json"
+    "electron:dev": "NODE_ENV=development concurrently \"vite --port 8015\" \"wait-on http://localhost:8015 && npx tsc --project electron/tsconfig.json && electron dist-electron/main.js\"",
+    "electron:build": "vite build --config electron/vite.electron.ts && npx tsc --project electron/tsconfig.json && electron-builder --config electron-builder.json",
+    "clean": "rm -rf dist electron/dist dist-electron"
   },
   "dependencies": {
     "@ag-media/react-pdf-table": "^2.0.3",

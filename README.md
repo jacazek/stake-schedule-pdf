@@ -91,8 +91,15 @@ npm run electron:build
 
 This produces an AppImage in the `dist/` directory (e.g., `dist/pdf-test-0.0.0.AppImage`). The AppImage can be run directly on most Linux distributions.
 
-## Transforms
+## Clean
 
+Remove all build artifacts:
+
+```bash
+npm run clean
+```
+
+This removes `dist/`, `electron/dist/`, and `dist-electron/`.
 
 ## Transforms
 To prepare and transform CSV to json for web application, run following transforms from root of project.
