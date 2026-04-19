@@ -12,5 +12,8 @@
   "linux": {
     "target": ["AppImage"],
     "category": "Office"
+  },
+  "win": {
+    "target": "zip"
   }
 }
