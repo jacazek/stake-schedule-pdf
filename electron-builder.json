@@ -1,12 +1,12 @@
 {
   "appId": "com.durhamstake.app",
   "files": [
-    "dist/**/*",
-    "main.js",
-    "preload.js"
+    "electron/dist/**/*",
+    "dist-electron/main.js",
+    "dist-electron/preload.js"
   ],
   "extraMetadata": {
-    "main": "main.js"
+    "main": "dist-electron/main.js"
   },
   "linux": {
     "target": ["AppImage"],
