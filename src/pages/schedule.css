@@ -1,0 +1,16 @@
+#speaker-schedule {
+    /* inline-size: 100%; */
+    /* padding-inline: .25in; */
+    /* block-size: 100%; */
+    /* background-color: white;
+    color: black; */
+    flex-grow: 1;
+}
+
+.container {
+    /* inline-size: 100%;*/
+    block-size: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-block-end: 1rem;
+}

@@ -1,0 +1,8 @@
+.footer-link {
+    padding-inline: 1rem;
+    border-inline-end: solid 1px;
+}
+
+.footer-link:last-of-type {
+    border-inline-end: none;
+}
