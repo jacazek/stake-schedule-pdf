@@ -129,6 +129,15 @@ function setupIPC() {
     return fs.promises.readFile(filePath, "utf-8");
   });
 
+  // FS: read file by directory + filename (uses path.join for cross-platform paths)
+  ipcMain.handle(
+    "fs:read-file-by-dir",
+    async (_event, dir: string, filename: string) => {
+      const filePath = path.join(dir, filename);
+      return fs.promises.readFile(filePath, "utf-8");
+    },
+  );
+
   // FSWatch: start watching (polling-based, reliable on Linux)
   ipcMain.handle(
     "fswatch:watch",

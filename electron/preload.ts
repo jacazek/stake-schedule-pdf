@@ -12,6 +12,8 @@ const electronAPI = {
   fs: {
     readFile: (path: string): Promise<string> =>
       ipcRenderer.invoke('fs:read-file', path),
+    readFileByDir: (dir: string, filename: string): Promise<string> =>
+      ipcRenderer.invoke('fs:read-file-by-dir', dir, filename),
   },
   fswatch: {
     watch: (dir: string, callbackId: string): Promise<void> =>

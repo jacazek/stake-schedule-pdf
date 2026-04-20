@@ -7,7 +7,6 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import path from "path";
 
 import { useNavigate } from "react-router-dom";
 
@@ -42,11 +41,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }>({ callbackId: null, fileChangeOff: null, lastLoad: 0 });
   const navigate = useNavigate();
 
-  const readFile = useCallback(async (filePath: string): Promise<string> => {
-    const result = await window.electron.fs.readFile(filePath);
-    return result;
-  }, []);
-
   const loadData = useCallback(
     async (dir?: string) => {
       const currentDir = dir ?? dataDir;
@@ -58,12 +52,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       try {
-        const speakerPath = path.join(currentDir, "speaker-schedule.json");
-        const unitPath = path.join(currentDir, "unit-schedule.json");
-
         const [speakerRaw, unitRaw] = await Promise.all([
-          readFile(speakerPath),
-          readFile(unitPath),
+          window.electron.fs.readFileByDir(currentDir, "speaker-schedule.json"),
+          window.electron.fs.readFileByDir(currentDir, "unit-schedule.json"),
         ]);
 
         const speaker = JSON.parse(speakerRaw);
@@ -81,7 +72,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     },
-    [dataDir, readFile],
+    [dataDir],
   );
 
   const selectDirectory = useCallback(
