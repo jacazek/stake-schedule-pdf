@@ -44,14 +44,72 @@ The data is organized by date, unit, and speaker, making it easy to find specifi
 This is a specialized application designed for organizational use within a religious stake to manage speaking assignments and ministering activities across multiple units.
 
 ## Prerequisites
-Requires Node.js 24+
-Earlier versions may work but untested.
+
+- **Node.js** 24+ (earlier versions may work but untested)
+- **Linux** (for the distributable): `libnss3`, `libnspr4`, `libasound2`, `libatk1.0-0`, `libatk-bridge2.0-0`, `libcups2`, `libdrm2`, `libxkbcommon0`, `libxcomposite1`, `libxdamage1`, `libxrandr2`, `libgbm1`, `libpango-1.0-0`, `libcairo2`
+
+On openSUSE, install Electron system dependencies with:
+```bash
+sudo zypper install -y libnss3 libnspr4 alsa-lib libatk1.0-0 libatk-bridge2.0-0 cups-libs libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2
+```
+
 ## Install dependencies
-`npm install`
+
+```bash
+npm install
+```
 
 ## Run
-`npm run dev`
 
+### Web (development)
+
+```bash
+npm run dev
+```
+
+### Desktop (Electron, development)
+
+```bash
+npm run electron:dev
+```
+
+This starts the Vite dev server and launches the Electron app, which connects to the dev server with hot reload.
+
+## Build
+
+### Web
+
+```bash
+npm run build
+```
+
+### Desktop (Electron distributable)
+
+#### Linux
+
+```bash
+npm run electron:build
+```
+
+This produces an AppImage in the `dist/` directory (e.g., `dist/stake-schedule-pdf-0.0.0.AppImage`). The AppImage can be run directly on most Linux distributions.
+
+#### Windows
+
+```bash
+npm run electron:build:win
+```
+
+This produces a portable zip archive in the `dist/` directory (e.g., `dist/stake-schedule-pdf-0.0.0-win.zip`). Extract the zip and run `stake-schedule-pdf.exe` on any Windows machine — no installation required.
+
+## Clean
+
+Remove all build artifacts:
+
+```bash
+npm run clean
+```
+
+This removes `dist/`, `electron/dist/`, and `dist-electron/`.
 
 ## Transforms
 To prepare and transform CSV to json for web application, run following transforms from root of project.
