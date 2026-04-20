@@ -3,17 +3,22 @@
   "files": [
     "electron/dist/**/*",
     "dist-electron/main.js",
-    "dist-electron/preload.js",
-    "dist/**/*"
+    "dist-electron/preload.js"
   ],
   "extraMetadata": {
     "main": "dist-electron/main.js"
   },
   "linux": {
     "target": ["AppImage"],
-    "category": "Office"
+    "category": "Office",
+    "files": [
+      "dist/builder-effective-config.yaml",
+      "dist/linux-unpacked",
+      "dist/latest-linux.yml"
+    ]
   },
   "win": {
-    "target": "zip"
+    "target": "zip",
+    "files": ["dist/builder-effective-config.yaml", "dist/win-unpacked"]
   }
 }
