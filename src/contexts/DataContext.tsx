@@ -7,6 +7,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import path from "path";
 
 import { useNavigate } from "react-router-dom";
 
@@ -57,8 +58,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       try {
-        const speakerPath = pathJoin(currentDir, "speaker-schedule.json");
-        const unitPath = pathJoin(currentDir, "unit-schedule.json");
+        const speakerPath = path.join(currentDir, "speaker-schedule.json");
+        const unitPath = path.join(currentDir, "unit-schedule.json");
 
         const [speakerRaw, unitRaw] = await Promise.all([
           readFile(speakerPath),
@@ -200,8 +201,3 @@ export function useData() {
   return ctx;
 }
 
-// Simple path join that works in browser context
-function pathJoin(base: string, ...parts: string[]): string {
-  const joined = base.split(/[/\\]/).filter(Boolean).join("/");
-  return `/${joined}/${parts.join("/")}`;
-}
