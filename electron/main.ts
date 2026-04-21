@@ -143,8 +143,8 @@ function setupIPC() {
     "fswatch:watch",
     async (_event, dir: string, callbackId: string) => {
       // Stop existing watches
-      for (const [, watcher] of watchFiles) {
-        (watcher as any).close();
+      for (const filePath of watchFiles.keys()) {
+        fs.unwatchFile(filePath);
       }
       watchFiles.clear();
 
@@ -175,8 +175,8 @@ function setupIPC() {
 
   // FSWatch: stop watching
   ipcMain.handle("fswatch:unwatch", async () => {
-    for (const [, watcher] of watchFiles) {
-      (watcher as any).close();
+    for (const filePath of watchFiles.keys()) {
+      fs.unwatchFile(filePath);
     }
     watchFiles.clear();
     updateMenuStatus(null, false);
