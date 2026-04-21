@@ -75,6 +75,42 @@ This removes `dist/`, `electron/dist/`, and `dist-electron/`.
 - `dist/` — Electron build output
 - `dist-electron/` — Compiled Electron JavaScript
 
+## Updating Static Text
+
+Static text embedded in the PDF output can be edited directly in the page components.
+
+### `src/pages/speaker-schedule.tsx`
+
+| Text | Location |
+|------|----------|
+| `subtext` on title page (`"Stake Council Speaking Schedule & Ministering Interviews for 2026"`) | Line 103 |
+| TOC note (`"Click on the name to view assignment details."`) | Line 106 |
+| "Back to Contents" | Lines 118, 155, 216 |
+| "Instructions for SP, HC, and Stake Organization Speaking Assignments" | Lines 131-133 |
+| Instruction paragraphs (stake orgs, coordinate date/topic, multiple speakers) | Lines 138-151 |
+| "Topics for Stake Council Speaking Assignments" | Line 168 |
+| Intro paragraph about scheduling topics | Lines 174-182 |
+| `speakingTopics` array (7 topic descriptions) | Lines 62-70 |
+
+### `src/pages/unit-schedule.tsx`
+
+| Text | Location |
+|------|----------|
+| `subtext` on title page (`"Unit Speaking Schedule & Ministering Interviews for 2026"`) | Line 74 |
+| TOC note (`"Click on a unit name to see unit information."`) | Line 77 |
+| "Back to Contents" | Lines 88, 128, 160 |
+| "Instructions for Ward Speaking Branch Assignments" | Lines 96-100 |
+| Instruction paragraphs (speaker responsibility, recommendations, coordination, unit swaps) | Lines 105-124 |
+| "Instructions for Ministering Visits" | Lines 135-139 |
+| Ministering visit paragraphs (organization, members to visit, email reminder) | Lines 145-156 |
+
+### Common patterns
+
+- Year references (e.g. `"for 2026"`) appear in the title page `subtext` prop on both pages
+- "Back to Contents" links use the `#toc` anchor and appear at the bottom of each PDF page
+- TOC notes are passed as the `note` prop to `<TableOfContents>` / `<SingleColumnTOC>`
+- Instruction text uses `<Text style={PARAGRAPH}>` blocks inside `<View style={{ padding: "0 .75in" }}>`
+
 ## Input files
 
 There are 7 input csv files. Contents of each describe below.
