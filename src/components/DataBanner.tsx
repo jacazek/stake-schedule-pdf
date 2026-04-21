@@ -52,7 +52,7 @@ export function DataBanner() {
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <span>No data directory selected. Select the directory containing your JSON data files.</span>
+        <span>No data directory selected. Select the directory containing your CSV data files.</span>
         <button onClick={handleOpenFolder} style={buttonStyle}>
           Open Folder
         </button>
