@@ -4,12 +4,14 @@ interface ElectronAPI {
   }
   fs: {
     readFile: (path: string) => Promise<string>
+    readFileByDir: (dir: string, filename: string) => Promise<string>
   }
   fswatch: {
     watch: (dir: string, callbackId: string) => Promise<void>
     unwatch: () => Promise<void>
   }
   onChange: (callbackId: string, callback: (event: string, filename: string) => void) => void
+  onFileChange: () => { off: () => void }
   removeChangeCallback: (callbackId: string) => void
   onEvent: (event: string, callback: (...args: any[]) => void) => { off: () => void }
 }

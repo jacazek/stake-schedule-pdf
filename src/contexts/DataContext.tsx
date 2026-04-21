@@ -9,6 +9,22 @@ import {
 } from "react";
 
 import { useNavigate } from "react-router-dom";
+import Papa from "papaparse";
+
+import { mapSpeakerSchedule } from "../lib/speaker-schedule";
+import { mapUnitSchedule } from "../lib/unit-schedule";
+
+const DATA_DIR_KEY = "dataDir";
+
+const CSV_FILES = [
+  "units.csv",
+  "speakers.csv",
+  "speaking-assignments.csv",
+  "speaker-ministering.csv",
+  "stake_presidency_speaking_assignments.csv",
+  "unit_provide_speakers.csv",
+  "unit-ministering.csv",
+];
 
 interface DataState {
   speakerData: unknown[] | null;
@@ -22,8 +38,6 @@ interface DataState {
 }
 
 export const DataContext = createContext<DataState | null>(null);
-
-const DATA_FILES = ["speaker-schedule.json", "unit-schedule.json"];
 
 let callbackIdCounter = 0;
 
@@ -41,42 +55,90 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }>({ callbackId: null, fileChangeOff: null, lastLoad: 0 });
   const navigate = useNavigate();
 
-  const loadData = useCallback(
-    async (dir?: string) => {
-      const currentDir = dir ?? dataDir;
-      if (!currentDir) {
-        return;
+  const loadData = useCallback(async (dir?: string) => {
+    const currentDir = dir ?? dataDir;
+    if (!currentDir) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const csvStrings: Record<string, string> = {};
+      await Promise.all(
+        CSV_FILES.map(async (file) => {
+          csvStrings[file] = await window.electron.fs.readFileByDir(
+            currentDir,
+            file,
+          );
+        }),
+      );
+
+      const parsed: Record<string, unknown[]> = {};
+      for (const file of CSV_FILES) {
+        const result = Papa.parse(csvStrings[file], { header: true });
+        if (result.errors.length > 0) {
+          throw new Error(
+            `Error parsing ${file}: ${result.errors[0].message}`,
+          );
+        }
+        parsed[file] = result.data;
       }
 
-      setLoading(true);
-      setError(null);
+      const speakers = parsed["speakers.csv"] as Record<string, unknown>[];
+      const units = parsed["units.csv"] as Record<string, unknown>[];
+      const speakingAssignments = parsed["speaking-assignments.csv"] as Record<
+        string,
+        unknown
+      >[];
+      const ministering = parsed["speaker-ministering.csv"] as Record<
+        string,
+        unknown
+      >[];
+      const presidencyAssignments = parsed[
+        "stake_presidency_speaking_assignments.csv"
+      ] as Record<string, unknown>[];
+      const providingSpeakers = parsed[
+        "unit_provide_speakers.csv"
+      ] as Record<string, unknown>[];
+      const unitMinistering = parsed["unit-ministering.csv"] as Record<
+        string,
+        unknown
+      >[];
 
-      try {
-        const [speakerRaw, unitRaw] = await Promise.all([
-          window.electron.fs.readFileByDir(currentDir, "speaker-schedule.json"),
-          window.electron.fs.readFileByDir(currentDir, "unit-schedule.json"),
-        ]);
+      const mappedSpeakerData = mapSpeakerSchedule(
+        speakers,
+        speakingAssignments,
+        ministering,
+        units,
+      );
+      const mappedUnitData = mapUnitSchedule(
+        units,
+        speakers,
+        speakingAssignments,
+        presidencyAssignments,
+        providingSpeakers,
+        unitMinistering,
+      );
 
-        const speaker = JSON.parse(speakerRaw);
-        const unit = JSON.parse(unitRaw);
+      setSpeakerData(mappedSpeakerData);
+      setUnitData(mappedUnitData);
 
-        setSpeakerData(speaker);
-        setUnitData(unit);
-
-        watchRef.current.lastLoad = Date.now();
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Failed to load data files";
-        setError(message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [dataDir],
-  );
+      watchRef.current.lastLoad = Date.now();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load data files";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, [dataDir]);
 
   const selectDirectory = useCallback(
     async (dir: string) => {
+      // Persist to localStorage
+      localStorage.setItem(DATA_DIR_KEY, dir);
       setDataDir(dir);
       setError(null);
 
@@ -88,7 +150,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
           watchRef.current.fileChangeOff.off();
           watchRef.current.fileChangeOff = null;
         }
-        // Remove old callback so new IPC listener doesn't find stale IDs
         window.electron.removeChangeCallback(watchRef.current.callbackId);
       }
 
@@ -97,14 +158,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       watchRef.current.callbackId = id;
 
       window.electron.onChange(id, (_event, filename) => {
-        if (filename && DATA_FILES.some((f) => filename.includes(f))) {
-          // Debounce: skip reloads within 2s of last load to avoid parsing
-          // incomplete JSON while the editor is still writing the file
+        if (filename && CSV_FILES.some((f) => f === filename)) {
           const now = Date.now();
           if (now - watchRef.current.lastLoad < 2000) {
             return;
           }
-          loadData(dir);
+          loadData();
         }
       });
 
@@ -153,6 +212,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Auto-load from localStorage on mount
+  useEffect(() => {
+    const storedDir = localStorage.getItem(DATA_DIR_KEY);
+    if (storedDir) {
+      selectDirectory(storedDir);
+    }
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -191,4 +258,3 @@ export function useData() {
   }
   return ctx;
 }
-
