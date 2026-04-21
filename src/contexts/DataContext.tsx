@@ -55,85 +55,88 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }>({ callbackId: null, fileChangeOff: null, lastLoad: 0 });
   const navigate = useNavigate();
 
-  const loadData = useCallback(async (dir?: string) => {
-    const currentDir = dir ?? dataDir;
-    if (!currentDir) {
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const csvStrings: Record<string, string> = {};
-      await Promise.all(
-        CSV_FILES.map(async (file) => {
-          csvStrings[file] = await window.electron.fs.readFileByDir(
-            currentDir,
-            file,
-          );
-        }),
-      );
-
-      const parsed: Record<string, unknown[]> = {};
-      for (const file of CSV_FILES) {
-        const result = Papa.parse(csvStrings[file], { header: true });
-        if (result.errors.length > 0) {
-          throw new Error(
-            `Error parsing ${file}: ${result.errors[0].message}`,
-          );
-        }
-        parsed[file] = result.data;
+  const loadData = useCallback(
+    async (dir?: string) => {
+      const currentDir = dir ?? dataDir;
+      if (!currentDir) {
+        return;
       }
 
-      const speakers = parsed["speakers.csv"] as Record<string, unknown>[];
-      const units = parsed["units.csv"] as Record<string, unknown>[];
-      const speakingAssignments = parsed["speaking-assignments.csv"] as Record<
-        string,
-        unknown
-      >[];
-      const ministering = parsed["speaker-ministering.csv"] as Record<
-        string,
-        unknown
-      >[];
-      const presidencyAssignments = parsed[
-        "stake_presidency_speaking_assignments.csv"
-      ] as Record<string, unknown>[];
-      const providingSpeakers = parsed[
-        "unit_provide_speakers.csv"
-      ] as Record<string, unknown>[];
-      const unitMinistering = parsed["unit-ministering.csv"] as Record<
-        string,
-        unknown
-      >[];
+      setLoading(true);
+      setError(null);
 
-      const mappedSpeakerData = mapSpeakerSchedule(
-        speakers,
-        speakingAssignments,
-        ministering,
-        units,
-      );
-      const mappedUnitData = mapUnitSchedule(
-        units,
-        speakers,
-        speakingAssignments,
-        presidencyAssignments,
-        providingSpeakers,
-        unitMinistering,
-      );
+      try {
+        const csvStrings: Record<string, string> = {};
+        await Promise.all(
+          CSV_FILES.map(async (file) => {
+            csvStrings[file] = await window.electron.fs.readFileByDir(
+              currentDir,
+              file,
+            );
+          }),
+        );
 
-      setSpeakerData(mappedSpeakerData);
-      setUnitData(mappedUnitData);
+        const parsed: Record<string, unknown[]> = {};
+        for (const file of CSV_FILES) {
+          const result = Papa.parse(csvStrings[file], { header: true });
+          if (result.errors.length > 0) {
+            throw new Error(
+              `Error parsing ${file}: ${result.errors[0].message}`,
+            );
+          }
+          parsed[file] = result.data;
+        }
 
-      watchRef.current.lastLoad = Date.now();
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to load data files";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, [dataDir]);
+        const speakers = parsed["speakers.csv"] as Record<string, unknown>[];
+        const units = parsed["units.csv"] as Record<string, unknown>[];
+        const speakingAssignments = parsed[
+          "speaking-assignments.csv"
+        ] as Record<string, unknown>[];
+        const ministering = parsed["speaker-ministering.csv"] as Record<
+          string,
+          unknown
+        >[];
+        const presidencyAssignments = parsed[
+          "stake_presidency_speaking_assignments.csv"
+        ] as Record<string, unknown>[];
+        const providingSpeakers = parsed["unit_provide_speakers.csv"] as Record<
+          string,
+          unknown
+        >[];
+        const unitMinistering = parsed["unit-ministering.csv"] as Record<
+          string,
+          unknown
+        >[];
+
+        const mappedSpeakerData = mapSpeakerSchedule(
+          speakers,
+          speakingAssignments,
+          ministering,
+          units,
+        );
+        const mappedUnitData = mapUnitSchedule(
+          units,
+          speakers,
+          speakingAssignments,
+          presidencyAssignments,
+          providingSpeakers,
+          unitMinistering,
+        );
+
+        setSpeakerData(mappedSpeakerData);
+        setUnitData(mappedUnitData);
+
+        watchRef.current.lastLoad = Date.now();
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to load data files";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [dataDir],
+  );
 
   const selectDirectory = useCallback(
     async (dir: string) => {
@@ -159,11 +162,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       window.electron.onChange(id, (_event, filename) => {
         if (filename && CSV_FILES.some((f) => f === filename)) {
+          console.log("file changesd", filename);
           const now = Date.now();
           if (now - watchRef.current.lastLoad < 2000) {
             return;
           }
-          loadData();
+          loadData(dir);
         }
       });
 
