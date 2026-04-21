@@ -13,18 +13,9 @@ import Papa from "papaparse";
 
 import { mapSpeakerSchedule } from "../lib/speaker-schedule";
 import { mapUnitSchedule } from "../lib/unit-schedule";
+import { CSV_FILES } from "../../electron/csv-files";
 
 const DATA_DIR_KEY = "dataDir";
-
-const CSV_FILES = [
-  "units.csv",
-  "speakers.csv",
-  "speaking-assignments.csv",
-  "speaker-ministering.csv",
-  "stake_presidency_speaking_assignments.csv",
-  "unit_provide_speakers.csv",
-  "unit-ministering.csv",
-];
 
 interface DataState {
   speakerData: unknown[] | null;

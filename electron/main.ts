@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { CSV_FILES } from "./csv-files.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -148,16 +150,7 @@ function setupIPC() {
       }
       watchFiles.clear();
 
-      const dataFiles = [
-        "units.csv",
-        "speakers.csv",
-        "speaking-assignments.csv",
-        "speaker-ministering.csv",
-        "stake_presidency_speaking_assignments.csv",
-        "unit_provide_speakers.csv",
-        "unit-ministering.csv",
-      ];
-      const filePaths = dataFiles.map((f) => path.join(dir, f));
+      const filePaths = CSV_FILES.map((f: string) => path.join(dir, f));
 
       for (const filePath of filePaths) {
         const watcher = fs.watchFile(filePath, { interval: 1000 }, () => {
