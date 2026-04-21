@@ -212,6 +212,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Listen for manual refresh from menu
+  useEffect(() => {
+    if (!window.electron) return;
+    const subscription = window.electron.onEvent("data:refresh", () => {
+      refresh();
+    });
+    return () => subscription.off();
+  }, [refresh]);
+
   // Auto-load from localStorage on mount
   useEffect(() => {
     const storedDir = localStorage.getItem(DATA_DIR_KEY);
