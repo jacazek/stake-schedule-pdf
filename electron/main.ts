@@ -148,7 +148,15 @@ function setupIPC() {
       }
       watchFiles.clear();
 
-      const dataFiles = ["speaker-schedule.json", "unit-schedule.json"];
+      const dataFiles = [
+        "units.csv",
+        "speakers.csv",
+        "speaking-assignments.csv",
+        "speaker-ministering.csv",
+        "stake_presidency_speaking_assignments.csv",
+        "unit_provide_speakers.csv",
+        "unit-ministering.csv",
+      ];
       const filePaths = dataFiles.map((f) => path.join(dir, f));
 
       for (const filePath of filePaths) {
